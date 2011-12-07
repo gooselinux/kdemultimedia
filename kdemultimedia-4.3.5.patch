@@ -1,0 +1,1367 @@
+diff -Nur kdemultimedia-4.3.4/dragonplayer/misc/dragonplayer.desktop kdemultimedia-4.3.5/dragonplayer/misc/dragonplayer.desktop
+--- kdemultimedia-4.3.4/dragonplayer/misc/dragonplayer.desktop	2009-11-27 14:03:18.000000000 +0100
++++ kdemultimedia-4.3.5/dragonplayer/misc/dragonplayer.desktop	2010-01-21 21:49:16.000000000 +0100
+@@ -5,6 +5,7 @@
+ Name[ar]=مشغل دراجن
+ Name[bg]=Програма за видео Dragon
+ Name[ca]=Dragon Player
++Name[ca@valencia]=Dragon Player
+ Name[cs]=Přehrávač Dragon
+ Name[da]=Dragon Player
+ Name[de]=Dragon Player
+@@ -53,6 +54,7 @@
+ GenericName[ar]=مشغل فيديو
+ GenericName[bg]=Програма за възпроизвеждане на видео
+ GenericName[ca]=Reproductor de vídeo
++GenericName[ca@valencia]=Reproductor de vídeo
+ GenericName[cs]=Přehrávač videa
+ GenericName[da]=Videoafspiller
+ GenericName[de]=Video-Wiedergabe
+diff -Nur kdemultimedia-4.3.4/dragonplayer/misc/dragonplayer-opendvd.desktop kdemultimedia-4.3.5/dragonplayer/misc/dragonplayer-opendvd.desktop
+--- kdemultimedia-4.3.4/dragonplayer/misc/dragonplayer-opendvd.desktop	2009-11-27 14:03:18.000000000 +0100
++++ kdemultimedia-4.3.5/dragonplayer/misc/dragonplayer-opendvd.desktop	2010-01-21 21:49:16.000000000 +0100
+@@ -8,7 +8,8 @@
+ Name[ar]=افتح باستخدام مشغل الفيديو (مشغل دارجن)
+ Name[bg]=Отваряне с видео плеър (Dragon)
+ Name[ca]=Obre amb el reproductor de vídeo (Dragon Player)
+-Name[cs]=Otevřít ve video přehrávači (Gragon)
++Name[ca@valencia]=Obri amb el reproductor de vídeo (Dragon Player)
++Name[cs]=Otevřít ve video přehrávači (Dragon)
+ Name[da]=Åbn med videoafspiller (Dragon Player)
+ Name[de]=Mit dem Videoabspieler öffnen (Dragon Player)
+ Name[el]=Άνοιγμα με αναπαραγωγέα βίντεο (Dragon)
+diff -Nur kdemultimedia-4.3.4/dragonplayer/misc/dragonplayer_part.desktop kdemultimedia-4.3.5/dragonplayer/misc/dragonplayer_part.desktop
+--- kdemultimedia-4.3.4/dragonplayer/misc/dragonplayer_part.desktop	2009-11-27 14:03:18.000000000 +0100
++++ kdemultimedia-4.3.5/dragonplayer/misc/dragonplayer_part.desktop	2010-01-21 21:49:16.000000000 +0100
+@@ -5,6 +5,7 @@
+ Name[ar]=جزء مشغل دراجن
+ Name[bg]=Dragon (част)
+ Name[ca]=Part del Dragon Player
++Name[ca@valencia]=Part del Dragon Player
+ Name[cs]=Komponenta přehrávače Dragon
+ Name[da]=Dragon Player-part
+ Name[de]=Dragon-Player-KPart
+@@ -52,6 +53,7 @@
+ Comment[ar]=مشغل فيديو مضمن
+ Comment[bg]=Вграден видео плеър
+ Comment[ca]=Reproductor de vídeo encastat
++Comment[ca@valencia]=Reproductor de vídeo encastat
+ Comment[cs]=Vložený Video Přehrávač
+ Comment[da]=Videoafspiller som kan indlejres
+ Comment[de]=Eingebettete Video-Wiedergabe
+@@ -86,8 +88,8 @@
+ Comment[ru]=Встраиваемый видеопроигрыватель
+ Comment[sk]=Vložiteľný prehrávač videa
+ Comment[sl]=Vgradni predvajalnik videov
+-Comment[sr]=Угњездиви видео плејер
+-Comment[sr@latin]=Ugnjezdivi video plejer
++Comment[sr]=Угнездиви видео плејер
++Comment[sr@latin]=Ugnezdivi video plejer
+ Comment[sv]=Inbäddningsbar videospelare
+ Comment[th]=โปรแกรมเล่นวิดีโอแบบฝังตัวได้
+ Comment[tr]=Gömülebilir Video Oynatıcı
+diff -Nur kdemultimedia-4.3.4/dragonplayer/misc/dragonplayer_play_dvd.desktop kdemultimedia-4.3.5/dragonplayer/misc/dragonplayer_play_dvd.desktop
+--- kdemultimedia-4.3.4/dragonplayer/misc/dragonplayer_play_dvd.desktop	2009-11-27 14:03:18.000000000 +0100
++++ kdemultimedia-4.3.5/dragonplayer/misc/dragonplayer_play_dvd.desktop	2010-01-21 21:49:16.000000000 +0100
+@@ -9,6 +9,7 @@
+ Name[ar]=شغل ال DVD بواسطة الدراجن بلاير
+ Name[bg]=Изпълнение на DVD с Dragon
+ Name[ca]=Reprodueix DVD amb el Dragon Player
++Name[ca@valencia]=Reprodueix DVD amb el Dragon Player
+ Name[cs]=Přehrát DVD pomocí přehrávače Dragon
+ Name[da]=Afspil dvd med Dragon Player
+ Name[de]=DVD mit dem Dragon Player abspielen
+diff -Nur kdemultimedia-4.3.4/dragonplayer/src/app/part.cpp kdemultimedia-4.3.5/dragonplayer/src/app/part.cpp
+--- kdemultimedia-4.3.4/dragonplayer/src/app/part.cpp	2009-04-28 15:47:53.000000000 +0200
++++ kdemultimedia-4.3.5/dragonplayer/src/app/part.cpp	2010-01-21 21:49:16.000000000 +0100
+@@ -69,9 +69,12 @@
+             ac->addAction( sliderAction->objectName(), sliderAction );
+             toolBar->addAction( sliderAction );
+         }
+-        connect( engine(), SIGNAL( stateChanged( Phonon::State ) ), this, SLOT( engineStateChanged( Phonon::State ) ) );
++        connect( engine(), SIGNAL( stateUpdated( Phonon::State, Phonon::State ) ),
++                 this, SLOT( engineStateChanged( Phonon::State ) ) );
++
+         videoWindow()->setContextMenuPolicy( Qt::CustomContextMenu );
+-        connect( videoWindow(), SIGNAL( customContextMenuRequested() ), this, SLOT( videoContextMenu() ) );
++        connect( videoWindow(), SIGNAL( customContextMenuRequested(const QPoint &) ),
++                 this, SLOT( videoContextMenu(const QPoint &) ) );
+ 
+         widget()->setLayout( layout );
+     }
+diff -Nur kdemultimedia-4.3.4/juk/historyplaylist.cpp kdemultimedia-4.3.5/juk/historyplaylist.cpp
+--- kdemultimedia-4.3.4/juk/historyplaylist.cpp	2009-01-16 16:07:11.000000000 +0100
++++ kdemultimedia-4.3.5/juk/historyplaylist.cpp	2010-01-21 21:49:18.000000000 +0100
+@@ -29,12 +29,12 @@
+ ////////////////////////////////////////////////////////////////////////////////
+ 
+ HistoryPlaylist::HistoryPlaylist(PlaylistCollection *collection) :
+-    Playlist(collection, true), m_timer(0)
++    Playlist(collection, true),
++    m_timer(new QTimer(this))
+ {
+     setAllowDuplicates(true);
+-    m_timer = new QTimer(this);
+ 
+-    connect(PlayerManager::instance(), SIGNAL(signalPlay()), this, SLOT(slotAddPlaying()));
++    m_timer->setSingleShot(true);
+     connect(m_timer, SIGNAL(timeout()), this, SLOT(slotCreateNewItem()));
+ }
+ 
+@@ -71,22 +71,20 @@
+ // private slots
+ ////////////////////////////////////////////////////////////////////////////////
+ 
+-void HistoryPlaylist::slotAddPlaying()
++void HistoryPlaylist::appendProposedItem(const FileHandle &file)
+ {
+-    m_file = PlayerManager::instance()->playingFile();
+-    m_timer->stop();
+-    m_timer->setSingleShot(true);
+-    m_timer->start(delay());
++    m_file = file;
++
++    if(!m_file.isNull())
++        m_timer->start(delay());
++    else
++        m_timer->stop();
+ }
+ 
+ void HistoryPlaylist::slotCreateNewItem()
+ {
+-    PlayerManager *player = PlayerManager::instance();
+-
+-    if(player->playing() && m_file == player->playingFile()) {
+-        createItem(m_file);
+-        m_file = FileHandle::null();
+-    }
++    createItem(m_file);
++    m_file = FileHandle::null();
+ }
+ 
+ ////////////////////////////////////////////////////////////////////////////////
+diff -Nur kdemultimedia-4.3.4/juk/historyplaylist.h kdemultimedia-4.3.5/juk/historyplaylist.h
+--- kdemultimedia-4.3.4/juk/historyplaylist.h	2008-05-15 20:37:34.000000000 +0200
++++ kdemultimedia-4.3.5/juk/historyplaylist.h	2010-01-21 21:49:18.000000000 +0100
+@@ -54,12 +54,12 @@
+ public slots:
+     void cut() {}
+     void clear() {}
++    void appendProposedItem(const FileHandle &file);
+ 
+ protected:
+     virtual void polish();
+ 
+ private slots:
+-    void slotAddPlaying();
+     void slotCreateNewItem();
+ 
+ private:
+diff -Nur kdemultimedia-4.3.4/juk/juk.cpp kdemultimedia-4.3.5/juk/juk.cpp
+--- kdemultimedia-4.3.4/juk/juk.cpp	2009-10-30 13:30:24.000000000 +0100
++++ kdemultimedia-4.3.5/juk/juk.cpp	2010-01-21 21:49:18.000000000 +0100
+@@ -4,7 +4,7 @@
+     email                : wheeler@kde.org
+ 
+     copyright            : (C) 2008, 2009 by Michael Pyne
+-    email                : michael.pyne@kdemail.net
++    email                : mpyne@kde.org
+ ***************************************************************************/
+ 
+ /***************************************************************************
+@@ -61,14 +61,23 @@
+ 
+ JuK* JuK::m_instance;
+ 
++template<class T>
++void deleteAndClear(T *&ptr)
++{
++    delete ptr;
++    ptr = 0;
++}
++
+ ////////////////////////////////////////////////////////////////////////////////
+ // public members
+ ////////////////////////////////////////////////////////////////////////////////
+ 
+ JuK::JuK(QWidget *parent) :
+     KXmlGuiWindow(parent, Qt::WDestructiveClose),
++    m_splitter(0),
++    m_statusLabel(0),
+     m_systemTray(0),
+-    m_player(PlayerManager::instance()),
++    m_player(new PlayerManager),
+     m_shuttingDown(false)
+ {
+     // Expect segfaults if you change this order.
+@@ -96,6 +105,8 @@
+     readConfig();
+     setupGlobalAccels();
+ 
++    connect(QCoreApplication::instance(), SIGNAL(aboutToQuit()), SLOT(slotAboutToQuit()));
++
+     // slotCheckCache loads the cached entries first to populate the collection list
+ 
+     QTimer::singleShot(0, CollectionList::instance(), SLOT(slotCheckCache()));
+@@ -118,6 +129,11 @@
+     return m_instance;
+ }
+ 
++PlayerManager *JuK::playerManager() const
++{
++    return m_player;
++}
++
+ void JuK::coverDownloaded(const QPixmap &cover)
+ {
+     QString event(cover.isNull() ? "coverFailed" : "coverDownloaded");
+@@ -141,14 +157,14 @@
+ {
+     new TagTransactionManager(this);
+ 
+-    m_splitter = new PlaylistSplitter(this, "playlistSplitter");
++    m_splitter = new PlaylistSplitter(m_player, this);
+     setCentralWidget(m_splitter);
+ 
+     m_statusLabel = new StatusLabel(m_splitter->playlist(), statusBar());
+     connect(CollectionList::instance(), SIGNAL(signalCollectionChanged()),
+             m_statusLabel, SLOT(updateData()));
+     statusBar()->addWidget(m_statusLabel, 1);
+-    PlayerManager::instance()->setStatusLabel(m_statusLabel);
++    m_player->setStatusLabel(m_statusLabel);
+ 
+     m_splitter->setFocus();
+     resize(750, 500);
+@@ -298,14 +314,12 @@
+ void JuK::slotSetupSystemTray()
+ {
+     if(m_toggleSystemTrayAction && m_toggleSystemTrayAction->isChecked()) {
+-        m_systemTray = new SystemTray(this);
++        m_systemTray = new SystemTray(m_player, this);
+         m_systemTray->setObjectName("systemTray");
+         m_systemTray->show();
+ 
+         m_toggleDockOnCloseAction->setEnabled(true);
+         m_togglePopupsAction->setEnabled(true);
+-
+-        connect(QCoreApplication::instance(), SIGNAL(aboutToQuit()), SLOT(slotAboutToQuit()));
+         connect(m_systemTray, SIGNAL(quitSelected()), this, SLOT(slotQuit()));
+     }
+     else {
+@@ -481,11 +495,10 @@
+ {
+     m_shuttingDown = true;
+ 
+-    delete m_systemTray;
+-    m_systemTray = 0;
+-
+-    delete m_splitter;
+-    m_splitter = 0;
++    deleteAndClear(m_systemTray);
++    deleteAndClear(m_splitter);
++    deleteAndClear(m_player);
++    deleteAndClear(m_statusLabel);
+ 
+     // Playlists depend on CoverManager, so CoverManager should shutdown as
+     // late as possible
+diff -Nur kdemultimedia-4.3.4/juk/juk.desktop kdemultimedia-4.3.5/juk/juk.desktop
+--- kdemultimedia-4.3.4/juk/juk.desktop	2009-10-02 10:20:27.000000000 +0200
++++ kdemultimedia-4.3.5/juk/juk.desktop	2010-01-21 21:49:18.000000000 +0100
+@@ -14,6 +14,7 @@
+ Name[bn]=জুক
+ Name[br]=JuK
+ Name[ca]=JuK
++Name[ca@valencia]=JuK
+ Name[cs]=JuK
+ Name[cy]=JuK
+ Name[da]=JuK
+@@ -77,6 +78,7 @@
+ GenericName[bg]=Музикален плеър
+ GenericName[br]=C'hoarier ar sonerezh
+ GenericName[ca]=Reproductor musical
++GenericName[ca@valencia]=Reproductor musical
+ GenericName[cs]=Přehrávač hudby
+ GenericName[cy]=Chwaraewr Cerdd
+ GenericName[da]=Musikafspiller
+diff -Nur kdemultimedia-4.3.4/juk/juk.h kdemultimedia-4.3.5/juk/juk.h
+--- kdemultimedia-4.3.4/juk/juk.h	2009-03-10 13:26:10.000000000 +0100
++++ kdemultimedia-4.3.5/juk/juk.h	2010-01-21 21:49:18.000000000 +0100
+@@ -42,6 +42,8 @@
+ 
+     static JuK* JuKInstance();
+ 
++    PlayerManager *playerManager() const;
++
+     // Use a null cover for failure
+     void coverDownloaded(const QPixmap &cover);
+ 
+diff -Nur kdemultimedia-4.3.4/juk/juk.notifyrc kdemultimedia-4.3.5/juk/juk.notifyrc
+--- kdemultimedia-4.3.4/juk/juk.notifyrc	2009-11-27 14:03:19.000000000 +0100
++++ kdemultimedia-4.3.5/juk/juk.notifyrc	2010-01-21 21:49:18.000000000 +0100
+@@ -4,6 +4,7 @@
+ Comment[ar]=مشغل الموسيقى
+ Comment[bg]=Програма за изпълнение на музика
+ Comment[ca]=Reproductor musical
++Comment[ca@valencia]=Reproductor musical
+ Comment[cs]=Přehrávač hudby
+ Comment[da]=Musikafspiller
+ Comment[de]=Audio-Wiedergabe
+@@ -52,6 +53,7 @@
+ Name[bn]=জুক
+ Name[br]=JuK
+ Name[ca]=JuK
++Name[ca@valencia]=JuK
+ Name[cs]=JuK
+ Name[cy]=JuK
+ Name[da]=JuK
+@@ -116,6 +118,7 @@
+ Name[ar]=نزل الغلاف بنجاح
+ Name[bg]=Обложката е успешно изтеглена
+ Name[ca]=La caràtula s'ha descarregat correctament
++Name[ca@valencia]=La caràtula s'ha descarregat correctament
+ Name[cs]=Obal úspěšně stažen
+ Name[da]=Download af omslag gennemført
+ Name[de]=Titelbild erfolgreich heruntergeladen
+@@ -160,6 +163,7 @@
+ Comment[ar]=نزل الغلاف المطلوب
+ Comment[bg]=Търсената обложка е изтеглена
+ Comment[ca]=S'ha descarregat la caràtula demanada
++Comment[ca@valencia]=S'ha descarregat la caràtula demanada
+ Comment[cs]=Vyžádaný obal se byl údpěšně stažen
+ Comment[da]=En ønsket omslag er blevet downloadet
+ Comment[de]=Ein angefordertes Titelbild wurde heruntergeladen
+@@ -207,6 +211,7 @@
+ Name[ar]=فشل تنزيل الغلاف
+ Name[bg]=Грешка при изтегляне на обложката
+ Name[ca]=Ha fallat la descàrrega de la caràtula
++Name[ca@valencia]=Ha fallat la descàrrega de la caràtula
+ Name[cs]=Obal se nepovedlo stáhnout
+ Name[da]=Download af omslag mislykkedes
+ Name[de]=Herunterladen des Titelbildes fehlgeschlagen
+@@ -251,6 +256,7 @@
+ Comment[ar]=فشل تنزيل الغلاف المطلوب
+ Comment[bg]=Търсената обложка не е изтеглена
+ Comment[ca]=Una petició de descàrrega de caràtula ha fallat
++Comment[ca@valencia]=Una petició de descàrrega de caràtula ha fallat
+ Comment[cs]=Vyžádaný obal se nepovedlo stáhnout
+ Comment[da]=Download af et ønsket omslag mislykkedes
+ Comment[de]=Ein angefordertes Titelbild konnte nicht heruntergeladen werden
+diff -Nur kdemultimedia-4.3.4/juk/jukservicemenu.desktop kdemultimedia-4.3.5/juk/jukservicemenu.desktop
+--- kdemultimedia-4.3.4/juk/jukservicemenu.desktop	2009-10-02 10:20:27.000000000 +0200
++++ kdemultimedia-4.3.5/juk/jukservicemenu.desktop	2010-01-21 21:49:18.000000000 +0100
+@@ -10,6 +10,7 @@
+ Name[bn]=জুক সংকলনে যোগ করো 
+ Name[br]=Ouzhpennañ d'an dastumad JuK
+ Name[ca]=Afegeix a la col·lecció del JuK
++Name[ca@valencia]=Afig a la col·lecció del JuK
+ Name[cs]=Přidat do JuK kolekce
+ Name[cy]=Ychwanegu i Gasgliad JuK
+ Name[da]=Tilføj til JuK-samling
+diff -Nur kdemultimedia-4.3.4/juk/main.cpp kdemultimedia-4.3.5/juk/main.cpp
+--- kdemultimedia-4.3.4/juk/main.cpp	2009-10-30 13:30:24.000000000 +0100
++++ kdemultimedia-4.3.5/juk/main.cpp	2010-01-21 21:49:18.000000000 +0100
+@@ -118,8 +118,6 @@
+ 
+     // Create the main window and such
+ 
+-    a.start();
+-
+     return a.exec();
+ }
+ 
+diff -Nur kdemultimedia-4.3.4/juk/nowplaying.cpp kdemultimedia-4.3.5/juk/nowplaying.cpp
+--- kdemultimedia-4.3.4/juk/nowplaying.cpp	2009-11-27 14:03:19.000000000 +0100
++++ kdemultimedia-4.3.5/juk/nowplaying.cpp	2010-01-21 21:49:18.000000000 +0100
+@@ -2,6 +2,9 @@
+     begin                : Tue Nov 9 2004
+     copyright            : (C) 2004 by Scott Wheeler
+     email                : wheeler@kde.org
++
++    copyright            : (C) 2009 by Michael Pyne
++    email                : mpyne@kde.org
+  ***************************************************************************/
+ 
+ /***************************************************************************
+@@ -40,7 +43,6 @@
+ 
+ #include "playlistcollection.h"
+ #include "playlistitem.h"
+-#include "playermanager.h"
+ #include "coverinfo.h"
+ #include "covermanager.h"
+ #include "tag.h"
+@@ -80,9 +82,6 @@
+     layout->addWidget(new Line(this), 0);
+     layout->addWidget(new HistoryItem(this), 1);
+ 
+-    connect(PlayerManager::instance(), SIGNAL(signalPlay()), this, SLOT(slotUpdate()));
+-    connect(PlayerManager::instance(), SIGNAL(signalStop()), this, SLOT(slotUpdate()));
+-
+     hide();
+ }
+ 
+@@ -96,10 +95,9 @@
+     return m_collection;
+ }
+ 
+-void NowPlaying::slotUpdate()
++void NowPlaying::slotUpdate(const FileHandle &file)
+ {
+-    FileHandle file = PlayerManager::instance()->playingFile();
+-
++    m_file = file;
+     if(file.isNull()) {
+         hide();
+         emit nowPlayingHidden();
+@@ -112,6 +110,12 @@
+         item->update(file);
+ }
+ 
++void NowPlaying::slotReloadCurrentItem()
++{
++    foreach(NowPlayingItem *item, m_items)
++        item->update(m_file);
++}
++
+ ////////////////////////////////////////////////////////////////////////////////
+ // CoverItem
+ ////////////////////////////////////////////////////////////////////////////////
+@@ -130,11 +134,11 @@
+ {
+     m_file = file;
+ 
+-    if(file.coverInfo()->hasCover()) {
++    if(!file.isNull() && file.coverInfo()->hasCover()) {
+         show();
+         setPixmap(
+-	    file.coverInfo()->pixmap(CoverInfo::Thumbnail)
+-	    .scaled(imageSize, imageSize, Qt::KeepAspectRatio, Qt::SmoothTransformation));
++            file.coverInfo()->pixmap(CoverInfo::Thumbnail)
++            .scaled(imageSize, imageSize, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+     }
+     else
+         hide();
+@@ -248,11 +252,6 @@
+ 
+     m_label->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::LinksAccessibleByKeyboard);
+ 
+-#ifdef __GNUC__
+-    #warning We should potentially check on URL underlining.
+-#endif
+-    /* m_label->setLinkUnderline(false); */
+-
+     layout->addStretch();
+     layout->addWidget(m_label);
+     layout->addStretch();
+@@ -288,6 +287,11 @@
+ 
+ void TrackItem::slotUpdate()
+ {
++    if(m_file.isNull()) {
++        m_label->setText(QString());
++        return;
++    }
++
+     QString title  = Qt::escape(m_file.tag()->title());
+     QString artist = Qt::escape(m_file.tag()->artist());
+     QString album  = Qt::escape(m_file.tag()->album());
+@@ -328,14 +332,14 @@
+ 
+ HistoryItem::HistoryItem(NowPlaying *parent) :
+     QLabel(parent),
+-    NowPlayingItem(parent)
++    NowPlayingItem(parent),
++    m_timer(new QTimer(this))
+ {
+     setFixedHeight(parent->height() - parent->layout()->margin() * 2);
+     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+-    /* setLinkUnderline(false); */
+     setText(QString("<b>%1</b>").arg(i18n("History")));
+ 
+-    m_timer = new QTimer(this);
++    m_timer->setSingleShot(true);
+     connect(m_timer, SIGNAL(timeout()), this, SLOT(slotAddPlaying()));
+ }
+ 
+@@ -362,8 +366,6 @@
+     }
+ 
+     m_file = file;
+-    m_timer->stop();
+-    m_timer->setSingleShot(true);
+     m_timer->start(HistoryPlaylist::delay());
+ }
+ 
+@@ -389,14 +391,10 @@
+ {
+     // More or less copied from the HistoryPlaylist
+ 
+-    PlayerManager *manager = PlayerManager::instance();
+-
+-    if(manager->playing() && manager->playingFile() == m_file) {
++    if(!m_file.isNull()) {
+         m_history.prepend(Item(KRandom::randomString(20),
+                                m_file, Playlist::playingItem()->playlist()));
+     }
+-
+-    m_file = FileHandle::null();
+ }
+ 
+ #include "nowplaying.moc"
+diff -Nur kdemultimedia-4.3.4/juk/nowplaying.h kdemultimedia-4.3.5/juk/nowplaying.h
+--- kdemultimedia-4.3.4/juk/nowplaying.h	2009-11-27 14:03:19.000000000 +0100
++++ kdemultimedia-4.3.5/juk/nowplaying.h	2010-01-21 21:49:18.000000000 +0100
+@@ -45,8 +45,9 @@
+     void addItem(NowPlayingItem *item);
+     PlaylistCollection *collection() const;
+ 
+-private slots:
+-    void slotUpdate();
++public slots:
++    void slotUpdate(const FileHandle &file);
++    void slotReloadCurrentItem();
+ 
+ signals:
+     void nowPlayingHidden();
+@@ -58,7 +59,7 @@
+             PlaylistObserver(playlist),
+             m_parent(parent) {}
+         virtual void updateCurrent() {}
+-        virtual void updateData() { m_parent->slotUpdate(); }
++        virtual void updateData() { m_parent->slotReloadCurrentItem(); }
+         NowPlaying *m_parent;
+     };
+     friend struct Observer;
+@@ -67,6 +68,7 @@
+     Observer m_collectionListObserver;
+     PlaylistCollection *m_collection;
+     QList<NowPlayingItem *> m_items;
++    FileHandle m_file;
+ };
+ 
+ /**
+diff -Nur kdemultimedia-4.3.4/juk/playermanager.cpp kdemultimedia-4.3.5/juk/playermanager.cpp
+--- kdemultimedia-4.3.4/juk/playermanager.cpp	2009-10-30 13:30:24.000000000 +0100
++++ kdemultimedia-4.3.5/juk/playermanager.cpp	2010-01-21 21:49:18.000000000 +0100
+@@ -75,18 +75,14 @@
+ 
+ PlayerManager::~PlayerManager()
+ {
++    delete m_sliderAction;
++    m_sliderAction = 0;
+ }
+ 
+ ////////////////////////////////////////////////////////////////////////////////
+ // public members
+ ////////////////////////////////////////////////////////////////////////////////
+ 
+-PlayerManager *PlayerManager::instance() // static
+-{
+-    static PlayerManager manager;
+-    return &manager;
+-}
+-
+ bool PlayerManager::playing() const
+ {
+     if(!m_setup)
+@@ -175,14 +171,10 @@
+ 
+ QString PlayerManager::playingString() const
+ {
+-    if(!playing())
++    if(!playing() || m_file.isNull())
+         return QString();
+ 
+-    QString str = m_file.tag()->artist() + " - " + m_file.tag()->title();
+-    if(m_file.tag()->artist().isEmpty())
+-        str = m_file.tag()->title();
+-
+-    return str;
++    return m_file.tag()->playingString();
+ }
+ 
+ void PlayerManager::setPlaylistInterface(PlaylistInterface *interface)
+@@ -226,14 +218,19 @@
+             {
+                 mediaObject->setCurrentSource(KUrl::fromPath(m_file.absFilePath()));
+                 mediaObject->play();
++
++                emit signalItemChanged(m_file);
+             }
+         }
+     }
+     else {
+-        m_file = file;
+-
+-        mediaObject->setCurrentSource(KUrl::fromPath(m_file.absFilePath()));
++        mediaObject->setCurrentSource(KUrl::fromPath(file.absFilePath()));
+         mediaObject->play();
++
++        if(m_file != file)
++            emit signalItemChanged(file);
++
++        m_file = file;
+     }
+ 
+     // Our state changed handler will perform the follow up actions necessary
+@@ -286,6 +283,11 @@
+     stopCrossfade();
+     m_media[0]->stop();
+     m_media[1]->stop();
++
++    if(!m_file.isNull()) {
++        m_file = FileHandle::null();
++        emit signalItemChanged(m_file);
++    }
+ }
+ 
+ void PlayerManager::setVolume(float volume)
+@@ -417,6 +419,7 @@
+         stop();
+     }
+     else {
++        emit signalItemChanged(m_file);
+         m_media[m_curOutputPath]->setCurrentSource(m_file.absFilePath());
+         m_media[m_curOutputPath]->play();
+     }
+@@ -594,6 +597,7 @@
+ 
+     m_fader[nextOutputPath]->setVolume(0.0f);
+ 
++    emit signalItemChanged(newFile);
+     m_media[nextOutputPath]->setCurrentSource(newFile.absFilePath());
+     m_media[nextOutputPath]->play();
+ 
+diff -Nur kdemultimedia-4.3.4/juk/playermanager.h kdemultimedia-4.3.5/juk/playermanager.h
+--- kdemultimedia-4.3.4/juk/playermanager.h	2009-05-14 19:27:37.000000000 +0200
++++ kdemultimedia-4.3.5/juk/playermanager.h	2010-01-21 21:49:18.000000000 +0100
+@@ -51,13 +51,10 @@
+ {
+     Q_OBJECT
+ 
+-protected:
++public:
+     PlayerManager();
+     virtual ~PlayerManager();
+ 
+-public:
+-    static PlayerManager *instance();
+-
+     bool playing() const;
+     bool paused() const;
+     float volume() const;
+@@ -105,6 +102,7 @@
+     void signalPlay();
+     void signalPause();
+     void signalStop();
++    void signalItemChanged(const FileHandle &file);
+ 
+ private:
+     void setup();
+diff -Nur kdemultimedia-4.3.4/juk/playlistbox.cpp kdemultimedia-4.3.5/juk/playlistbox.cpp
+--- kdemultimedia-4.3.4/juk/playlistbox.cpp	2009-03-10 13:26:10.000000000 +0100
++++ kdemultimedia-4.3.5/juk/playlistbox.cpp	2010-01-21 21:49:18.000000000 +0100
+@@ -158,6 +158,12 @@
+ 
+     m_savePlaylistTimer = 0;
+ 
++    KToggleAction *historyAction =
++        new KToggleAction(KIcon("view-history"), i18n("Show &History"), ActionCollection::actions());
++    ActionCollection::actions()->addAction("showHistory", historyAction);
++    connect(historyAction, SIGNAL(triggered(bool)),
++            this, SLOT(slotSetHistoryPlaylistEnabled(bool)));
++
+     m_showTimer = new QTimer(this);
+     connect(m_showTimer, SIGNAL(timeout()), SLOT(slotShowDropTarget()));
+ 
+@@ -244,6 +250,15 @@
+         m_savePlaylistTimer->start(); // Restarts the timer if it's already running.
+ }
+ 
++void PlaylistBox::slotSetHistoryPlaylistEnabled(bool enable)
++{
++    setHistoryPlaylistEnabled(enable);
++    if(enable) {
++        connect(this, SIGNAL(playingItemChanged(FileHandle)),
++                historyPlaylist(), SLOT(appendProposedItem(FileHandle)));
++    }
++}
++
+ void PlaylistBox::setupPlaylist(Playlist *playlist, const QString &iconName)
+ {
+     setupPlaylist(playlist, iconName, 0);
+@@ -675,7 +690,7 @@
+     PlaylistItem *next = manager->nextItem(); // Allow manager to choose
+ 
+     if(next) {
+-        PlayerManager::instance()->play(next->file());
++        emit startFilePlayback(next->file());
+         playlistItem->playlist()->setPlaying(next);
+     }
+     else
+diff -Nur kdemultimedia-4.3.4/juk/playlistbox.h kdemultimedia-4.3.5/juk/playlistbox.h
+--- kdemultimedia-4.3.4/juk/playlistbox.h	2009-01-28 00:07:47.000000000 +0100
++++ kdemultimedia-4.3.5/juk/playlistbox.h	2010-01-21 21:49:18.000000000 +0100
+@@ -72,6 +72,7 @@
+     void slotFreezePlaylists();
+     void slotUnfreezePlaylists();
+     void slotPlaylistDataChanged();
++    void slotSetHistoryPlaylistEnabled(bool enable);
+ 
+ protected:
+     virtual void setupPlaylist(Playlist *playlist, const QString &iconName);
+@@ -80,6 +81,7 @@
+ signals:
+     void signalPlaylistDestroyed(Playlist *);
+     void startupComplete(); ///< Emitted after playlists are loaded.
++    void startFilePlayback(const FileHandle &file);
+ 
+ private:
+     void readConfig();
+diff -Nur kdemultimedia-4.3.4/juk/playlistcollection.cpp kdemultimedia-4.3.5/juk/playlistcollection.cpp
+--- kdemultimedia-4.3.4/juk/playlistcollection.cpp	2009-01-28 00:07:47.000000000 +0100
++++ kdemultimedia-4.3.5/juk/playlistcollection.cpp	2010-01-21 21:49:18.000000000 +0100
+@@ -87,7 +87,6 @@
+     m_instance = this;
+ 
+     m_actionHandler = new ActionHandler(this);
+-    PlayerManager::instance()->setPlaylistInterface(this);
+ 
+     // KDirLister's auto error handling seems to crash JuK during startup in
+     // readConfig().
+@@ -100,7 +99,6 @@
+ {
+     saveConfig();
+     delete m_actionHandler;
+-    PlayerManager::instance()->setPlaylistInterface(0);
+     Playlist::setShuttingDown();
+ }
+ 
+@@ -912,16 +910,10 @@
+     menu->addAction(createAction(i18n("Show Cover &Manager"),
+         SLOT(slotShowCoverManager()), "showCoverManager"));
+ 
+-    KToggleAction *historyAction =
+-        new KToggleAction(KIcon("view-history"), i18n("Show &History"), actions());
+-    actions()->addAction("showHistory", historyAction);
+-
+     KToggleAction *upcomingAction =
+         new KToggleAction(KIcon("go-jump-today"), i18n("Show &Play Queue"), actions());
+     actions()->addAction("showUpcoming", upcomingAction);
+ 
+-    connect(historyAction, SIGNAL(triggered(bool)),
+-            this, SLOT(slotSetHistoryPlaylistEnabled(bool)));
+     connect(upcomingAction, SIGNAL(triggered(bool)),
+             this, SLOT(slotSetUpcomingPlaylistEnabled(bool)));
+ }
+diff -Nur kdemultimedia-4.3.4/juk/playlistcollection.h kdemultimedia-4.3.5/juk/playlistcollection.h
+--- kdemultimedia-4.3.4/juk/playlistcollection.h	2009-01-28 00:07:47.000000000 +0100
++++ kdemultimedia-4.3.5/juk/playlistcollection.h	2010-01-21 21:49:18.000000000 +0100
+@@ -256,7 +256,6 @@
+     void slotGuessTagFromInternet() { m_collection->guessTagFromInternet(); }
+ 
+     void slotSetSearchEnabled(bool enable)           { m_collection->setSearchEnabled(enable); }
+-    void slotSetHistoryPlaylistEnabled(bool enable)  { m_collection->setHistoryPlaylistEnabled(enable); }
+     void slotSetUpcomingPlaylistEnabled(bool enable) { m_collection->setUpcomingPlaylistEnabled(enable); }
+     void slotShowCoverManager()                      { m_collection->showCoverManager(); }
+     void slotEnableDirWatch(bool enable)             { m_collection->enableDirWatch(enable); }
+diff -Nur kdemultimedia-4.3.4/juk/playlistsplitter.cpp kdemultimedia-4.3.5/juk/playlistsplitter.cpp
+--- kdemultimedia-4.3.4/juk/playlistsplitter.cpp	2009-02-12 11:25:54.000000000 +0100
++++ kdemultimedia-4.3.5/juk/playlistsplitter.cpp	2010-01-21 21:49:18.000000000 +0100
+@@ -28,6 +28,7 @@
+ 
+ #include <QEvent>
+ #include <QVBoxLayout>
++#include <QLatin1String>
+ #include <QList>
+ #include <QStackedWidget>
+ #include <QSizePolicy>
+@@ -45,16 +46,17 @@
+ // public methods
+ ////////////////////////////////////////////////////////////////////////////////
+ 
+-PlaylistSplitter::PlaylistSplitter(QWidget *parent, const char *name) :
++PlaylistSplitter::PlaylistSplitter(PlayerManager *player, QWidget *parent) :
+     QSplitter(Qt::Horizontal, parent),
+     m_newVisible(0),
+     m_playlistBox(0),
+     m_searchWidget(0),
+     m_playlistStack(0),
+     m_editor(0),
+-    m_nowPlaying(0)
++    m_nowPlaying(0),
++    m_player(player)
+ {
+-    setObjectName(name);
++    setObjectName(QLatin1String("playlistSplitter"));
+ 
+     setupActions();
+     setupLayout();
+@@ -62,6 +64,9 @@
+ 
+     m_editor->slotUpdateCollection();
+     m_editor->setupObservers();
++
++    connect(m_player, SIGNAL(signalItemChanged(FileHandle)),
++            this,     SIGNAL(playingItemChanged(FileHandle)));
+ }
+ 
+ PlaylistSplitter::~PlaylistSplitter()
+@@ -197,6 +202,10 @@
+     connect(m_playlistBox, SIGNAL(signalPlaylistDestroyed(Playlist *)),
+             m_editor, SLOT(slotPlaylistDestroyed(Playlist *)));
+     connect(m_playlistBox, SIGNAL(startupComplete()), SLOT(slotEnable()));
++    connect(m_playlistBox, SIGNAL(startFilePlayback(FileHandle)),
++            m_player, SLOT(play(FileHandle)));
++
++    m_player->setPlaylistInterface(m_playlistBox);
+ 
+     // Let interested parties know we're ready
+     connect(m_playlistBox, SIGNAL(startupComplete()), SIGNAL(guiReady()));
+@@ -204,6 +213,8 @@
+     insertWidget(0, m_playlistBox);
+ 
+     m_nowPlaying = new NowPlaying(top, m_playlistBox);
++    connect(m_player, SIGNAL(signalItemChanged(FileHandle)),
++            m_nowPlaying, SLOT(slotUpdate(FileHandle)));
+ 
+     // Create the search widget -- this must be done after the CollectionList is created.
+ 
+diff -Nur kdemultimedia-4.3.4/juk/playlistsplitter.h kdemultimedia-4.3.5/juk/playlistsplitter.h
+--- kdemultimedia-4.3.4/juk/playlistsplitter.h	2009-02-12 11:25:54.000000000 +0100
++++ kdemultimedia-4.3.5/juk/playlistsplitter.h	2010-01-21 21:49:18.000000000 +0100
+@@ -26,6 +26,8 @@
+ class TagEditor;
+ class PlaylistBox;
+ class NowPlaying;
++class PlayerManager;
++class FileHandle;
+ 
+ /**
+  * This is the main layout class of JuK.  It should contain a PlaylistBox and
+@@ -41,7 +43,7 @@
+     Q_OBJECT
+ 
+ public:
+-    explicit PlaylistSplitter(QWidget *parent, const char *name = 0);
++    PlaylistSplitter(PlayerManager *player, QWidget *parent);
+     virtual ~PlaylistSplitter();
+ 
+     PlaylistInterface *playlist() const;
+@@ -56,6 +58,8 @@
+      */
+     void guiReady();
+ 
++    void playingItemChanged(const FileHandle &file);
++
+ public slots:
+     virtual void setFocus();
+     virtual void slotFocusCurrentPlaylist();
+@@ -91,6 +95,7 @@
+     QStackedWidget *m_playlistStack;
+     TagEditor *m_editor;
+     NowPlaying *m_nowPlaying;
++    PlayerManager *m_player;
+ };
+ 
+ #endif
+diff -Nur kdemultimedia-4.3.4/juk/systemtray.cpp kdemultimedia-4.3.5/juk/systemtray.cpp
+--- kdemultimedia-4.3.4/juk/systemtray.cpp	2009-04-30 20:02:45.000000000 +0200
++++ kdemultimedia-4.3.5/juk/systemtray.cpp	2010-01-21 21:49:18.000000000 +0100
+@@ -174,8 +174,9 @@
+ // public methods
+ ////////////////////////////////////////////////////////////////////////////////
+ 
+-SystemTray::SystemTray(QWidget *parent) : KSystemTrayIcon(parent),
++SystemTray::SystemTray(PlayerManager *player, QWidget *parent) : KSystemTrayIcon(parent),
+                                           m_popup(0),
++                                          m_player(player),
+                                           m_fadeTimer(0),
+                                           m_fade(true),
+                                           m_hasCompositionManager(false)
+@@ -205,9 +206,9 @@
+ 
+     QMenu *cm = contextMenu();
+ 
+-    connect(PlayerManager::instance(), SIGNAL(signalPlay()), this, SLOT(slotPlay()));
+-    connect(PlayerManager::instance(), SIGNAL(signalPause()), this, SLOT(slotPause()));
+-    connect(PlayerManager::instance(), SIGNAL(signalStop()), this, SLOT(slotStop()));
++    connect(m_player, SIGNAL(signalPlay()), this, SLOT(slotPlay()));
++    connect(m_player, SIGNAL(signalPause()), this, SLOT(slotPause()));
++    connect(m_player, SIGNAL(signalStop()), this, SLOT(slotStop()));
+ 
+     cm->addAction( action("play") );
+     cm->addAction( action("pause") );
+@@ -233,9 +234,9 @@
+     connect(m_fadeTimer, SIGNAL(timeout()), SLOT(slotNextStep()));
+     connect(this, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), SLOT(slotActivated(QSystemTrayIcon::ActivationReason)));
+ 
+-    if(PlayerManager::instance()->playing())
++    if(m_player->playing())
+         slotPlay();
+-    else if(PlayerManager::instance()->paused())
++    else if(m_player->paused())
+         slotPause();
+ }
+ 
+@@ -250,13 +251,13 @@
+ 
+ void SystemTray::slotPlay()
+ {
+-    if(!PlayerManager::instance()->playing())
++    if(!m_player->playing())
+         return;
+ 
+-    QPixmap cover = PlayerManager::instance()->playingFile().coverInfo()->pixmap(CoverInfo::Thumbnail);
++    QPixmap cover = m_player->playingFile().coverInfo()->pixmap(CoverInfo::Thumbnail);
+ 
+     setIcon(m_playPix);
+-    setToolTip(PlayerManager::instance()->playingString(), cover);
++    setToolTip(m_player->playingString(), cover);
+     createPopup();
+ }
+ 
+@@ -270,10 +271,10 @@
+ 
+ void  SystemTray::slotPopupLargeCover()
+ {
+-    if(!PlayerManager::instance()->playing())
++    if(!m_player->playing())
+         return;
+ 
+-    FileHandle playingFile = PlayerManager::instance()->playingFile();
++    FileHandle playingFile = m_player->playingFile();
+     playingFile.coverInfo()->popup();
+ }
+ 
+@@ -401,7 +402,7 @@
+ 
+ void SystemTray::createPopup()
+ {
+-    FileHandle playingFile = PlayerManager::instance()->playingFile();
++    FileHandle playingFile = m_player->playingFile();
+     Tag *playingInfo = playingFile.tag();
+ 
+     // If the action exists and it's checked, do our stuff
+diff -Nur kdemultimedia-4.3.4/juk/systemtray.h kdemultimedia-4.3.5/juk/systemtray.h
+--- kdemultimedia-4.3.4/juk/systemtray.h	2009-04-30 20:02:45.000000000 +0200
++++ kdemultimedia-4.3.5/juk/systemtray.h	2010-01-21 21:49:18.000000000 +0100
+@@ -31,6 +31,7 @@
+ 
+ class QMouseEvent;
+ class QWheelEvent;
++class PlayerManager;
+ class QLabel;
+ class QTimer;
+ class KVBox;
+@@ -91,7 +92,7 @@
+     Q_OBJECT
+ 
+ public:
+-    SystemTray(QWidget *parent = 0);
++    SystemTray(PlayerManager *player, QWidget *parent = 0);
+     virtual ~SystemTray();
+ 
+ signals:
+@@ -150,6 +151,7 @@
+     QColor m_startColor, m_endColor;
+ 
+     PassiveInfo *m_popup;
++    PlayerManager *m_player;
+     QVector<QLabel *> m_labels;
+     QTimer *m_fadeTimer;
+     int m_step;
+diff -Nur kdemultimedia-4.3.4/juk/tag.cpp kdemultimedia-4.3.5/juk/tag.cpp
+--- kdemultimedia-4.3.4/juk/tag.cpp	2009-01-28 00:07:47.000000000 +0100
++++ kdemultimedia-4.3.5/juk/tag.cpp	2010-01-21 21:49:18.000000000 +0100
+@@ -2,6 +2,9 @@
+     begin                : Sun Feb 17 2002
+     copyright            : (C) 2002 - 2004 by Scott Wheeler
+     email                : wheeler@kde.org
++
++    copyright            : (C) 2009 by Michael Pyne
++    email                : mpyne@kde.org
+ ***************************************************************************/
+ 
+ /***************************************************************************
+@@ -16,6 +19,7 @@
+ #include "tag.h"
+ 
+ #include <kdebug.h>
++#include <klocale.h>
+ 
+ #include <QFile>
+ 
+@@ -149,6 +153,19 @@
+     return result;
+ }
+ 
++QString Tag::playingString() const
++{
++    QString str;
++    if(artist().isEmpty())
++        str = title();
++    else {
++        str = i18nc("a playing track, %1 is artist, %2 is song title",
++                    "%1 - %2").arg(artist(), title());
++    }
++
++    return str;
++}
++
+ CacheDataStream &Tag::read(CacheDataStream &s)
+ {
+     switch(s.cacheVersion()) {
+diff -Nur kdemultimedia-4.3.4/juk/tag.h kdemultimedia-4.3.5/juk/tag.h
+--- kdemultimedia-4.3.4/juk/tag.h	2008-01-05 01:02:04.000000000 +0100
++++ kdemultimedia-4.3.5/juk/tag.h	2010-01-21 21:49:18.000000000 +0100
+@@ -2,6 +2,9 @@
+     begin                : Sun Feb 17 2002
+     copyright            : (C) 2002 - 2004 by Scott Wheeler
+     email                : wheeler@kde.org
++
++    copyright            : (C) 2009 by Michael Pyne
++    email                : mpyne@kde.org
+ ***************************************************************************/
+ 
+ /***************************************************************************
+@@ -69,6 +72,13 @@
+      * isn't a one liner, provide the length in string form.
+      */
+     QString lengthString() const { return m_lengthString; }
++
++    /**
++     * Convenience function to return a concise string describing the track,
++     * usually in the form Artist - Title.
++     */
++    QString playingString() const;
++
+     CacheDataStream &read(CacheDataStream &s);
+ 
+ private:
+diff -Nur kdemultimedia-4.3.4/kioslave/audiocd/data/audiocd.desktop kdemultimedia-4.3.5/kioslave/audiocd/data/audiocd.desktop
+--- kdemultimedia-4.3.4/kioslave/audiocd/data/audiocd.desktop	2009-11-27 14:03:19.000000000 +0100
++++ kdemultimedia-4.3.5/kioslave/audiocd/data/audiocd.desktop	2010-01-21 21:49:19.000000000 +0100
+@@ -6,6 +6,7 @@
+ Name[ar]=متصفح الأقراص المدمجة الصوتية
+ Name[bg]=Разглеждане на аудио дискове
+ Name[ca]=Navegador de CD d'àudio
++Name[ca@valencia]=Navegador de CD d'àudio
+ Name[cs]=Prohlížeč zvukových CD
+ Name[da]=Lyd-cd-browser
+ Name[de]=Audio-CDs ansehen
+diff -Nur kdemultimedia-4.3.4/kioslave/audiocd/kcmaudiocd/audiocd.desktop kdemultimedia-4.3.5/kioslave/audiocd/kcmaudiocd/audiocd.desktop
+--- kdemultimedia-4.3.4/kioslave/audiocd/kcmaudiocd/audiocd.desktop	2009-11-27 14:03:19.000000000 +0100
++++ kdemultimedia-4.3.5/kioslave/audiocd/kcmaudiocd/audiocd.desktop	2010-01-21 21:49:19.000000000 +0100
+@@ -15,6 +15,7 @@
+ Name[bn]=অডিও সিডি
+ Name[br]=CD klevet
+ Name[ca]=CD d'àudio
++Name[ca@valencia]=CD d'àudio
+ Name[cs]=Zvuková CD
+ Name[cy]=CDau Sain
+ Name[da]=Lyd-cd'er
+@@ -83,6 +84,7 @@
+ Comment[bn]=অডিও-সিডি আই/ও স্লেভ কনফিগারেশন
+ Comment[br]=Kefluniadur Sklav IO Audiocd
+ Comment[ca]=Configuració de l'esclau d'E/S pels CD àudio
++Comment[ca@valencia]=Configuració de l'esclau d'E/S pels CD àudio
+ Comment[cs]=Nastavení IO klienta pro zvuková CD
+ Comment[cy]=Gosodiad Gwas IO ar gyfer CDau Sain
+ Comment[da]=Indstilling af IO-slave til lyd-cd'er
+@@ -147,6 +149,7 @@
+ Keywords[bn]=Audio CD,CD,Ogg,Vorbis,Encoding,CDDA,Bitrate
+ Keywords[br]=CD klevet,CD,Ogg,Vorbis,Kodadur,CDDA,Feur
+ Keywords[ca]=Àudio CD,CD,Ogg,Vorbis,Codificació,CDDA,Taxa de bits
++Keywords[ca@valencia]=Àudio CD,CD,Ogg,Vorbis,Codificació,CDDA,Taxa de bits
+ Keywords[cs]=Zvukové CD,CD,Ogg,Vorbis,Kódování,CDDA,Bitrate,CDDB
+ Keywords[cy]=CD Sain,CD,crynoddisg,Ogg,Vorbis,Amgodio,CDDA,Cyfradd Ddidau
+ Keywords[da]=Lyd-cd,CD,Ogg,Vorbis,Indkodning,CDDA,Bitrate
+diff -Nur kdemultimedia-4.3.4/kmix/kmixapplet.desktop kdemultimedia-4.3.5/kmix/kmixapplet.desktop
+--- kdemultimedia-4.3.4/kmix/kmixapplet.desktop	2009-11-27 14:03:19.000000000 +0100
++++ kdemultimedia-4.3.5/kmix/kmixapplet.desktop	2010-01-21 21:49:18.000000000 +0100
+@@ -5,6 +5,7 @@
+ Name[bg]=Звуков смесител
+ Name[br]=Mesker ar Son
+ Name[ca]=Mesclador de so
++Name[ca@valencia]=Mesclador de so
+ Name[cs]=Zvukový směšovač
+ Name[cy]=Cymysgydd Sŵn
+ Name[da]=Lydmikser
+@@ -69,6 +70,7 @@
+ Comment[ar]=تعرض مستوى الصوت وتدعك تتحكم به
+ Comment[bg]=Показване панела на звуковия смесител
+ Comment[ca]=Mostra i us permet controlar el volum dels sons
++Comment[ca@valencia]=Mostra i vos permet controlar el volum dels sons
+ Comment[cs]=Zobrazuje a umožňuje měnit hlasitost
+ Comment[da]=Viser og giver dig mulighed for at styre lydstyrker
+ Comment[de]=Zeigt Ihnen die Lautstärkeregler und lässt Sie die Lautstärke kontrollieren
+diff -Nur kdemultimedia-4.3.4/kmix/kmix_autostart.desktop kdemultimedia-4.3.5/kmix/kmix_autostart.desktop
+--- kdemultimedia-4.3.4/kmix/kmix_autostart.desktop	2009-10-30 13:30:24.000000000 +0100
++++ kdemultimedia-4.3.5/kmix/kmix_autostart.desktop	2010-01-21 21:49:18.000000000 +0100
+@@ -16,6 +16,7 @@
+ GenericName[bg]=Звуков смесител
+ GenericName[br]=Mesker ar Son
+ GenericName[ca]=Mesclador de so
++GenericName[ca@valencia]=Mesclador de so
+ GenericName[cs]=Zvukový směšovač
+ GenericName[cy]=Cymysgydd Sŵn
+ GenericName[da]=Lydmikser
+@@ -85,6 +86,7 @@
+ Name[bn]=কে-মিক্স
+ Name[br]=KMix
+ Name[ca]=KMix
++Name[ca@valencia]=KMix
+ Name[cs]=KMix
+ Name[cy]=KMix
+ Name[da]=KMix
+diff -Nur kdemultimedia-4.3.4/kmix/kmixctrl_restore.desktop kdemultimedia-4.3.5/kmix/kmixctrl_restore.desktop
+--- kdemultimedia-4.3.4/kmix/kmixctrl_restore.desktop	2009-11-27 14:03:19.000000000 +0100
++++ kdemultimedia-4.3.5/kmix/kmixctrl_restore.desktop	2010-01-21 21:49:18.000000000 +0100
+@@ -7,6 +7,7 @@
+ Name[bn]=মিক্সার সেটিংস পুনঃস্থাপন করে
+ Name[br]=Assav kefluniadur ar mesker
+ Name[ca]=Restaura l'arranjament del mesclador
++Name[ca@valencia]=Restaura l'arranjament del mesclador
+ Name[cs]=Obnovit nastavení směšovače
+ Name[cy]=Adfer Gosodiadau Cymysgydd
+ Name[da]=Genskab mikserindstillinger
+diff -Nur kdemultimedia-4.3.4/kmix/kmix.desktop kdemultimedia-4.3.5/kmix/kmix.desktop
+--- kdemultimedia-4.3.4/kmix/kmix.desktop	2009-10-30 13:30:24.000000000 +0100
++++ kdemultimedia-4.3.5/kmix/kmix.desktop	2010-01-21 21:49:18.000000000 +0100
+@@ -11,6 +11,7 @@
+ GenericName[bg]=Звуков смесител
+ GenericName[br]=Mesker ar Son
+ GenericName[ca]=Mesclador de so
++GenericName[ca@valencia]=Mesclador de so
+ GenericName[cs]=Zvukový směšovač
+ GenericName[cy]=Cymysgydd Sŵn
+ GenericName[da]=Lydmikser
+@@ -80,6 +81,7 @@
+ Name[bn]=কে-মিক্স
+ Name[br]=KMix
+ Name[ca]=KMix
++Name[ca@valencia]=KMix
+ Name[cs]=KMix
+ Name[cy]=KMix
+ Name[da]=KMix
+diff -Nur kdemultimedia-4.3.4/kmix/kmix.notifyrc kdemultimedia-4.3.5/kmix/kmix.notifyrc
+--- kdemultimedia-4.3.4/kmix/kmix.notifyrc	2009-11-27 14:03:19.000000000 +0100
++++ kdemultimedia-4.3.5/kmix/kmix.notifyrc	2010-01-21 21:49:18.000000000 +0100
+@@ -4,6 +4,7 @@
+ Comment[ar]=مازج الصوت
+ Comment[bg]=Звуков смесител
+ Comment[ca]=Mesclador de so
++Comment[ca@valencia]=Mesclador de so
+ Comment[cs]=Zvukový směšovač
+ Comment[da]=Lydmikser
+ Comment[de]=Lautstärkeregler
+@@ -57,6 +58,7 @@
+ Name[ar]=صوت اﻷداة اﻹحتياطى
+ Name[bg]=Стандартно звуково устройство
+ Name[ca]=Dispositiu d'àudio alternatiu
++Name[ca@valencia]=Dispositiu d'àudio alternatiu
+ Name[cs]=Náhradní zvukové zařízení
+ Name[da]=Erstatning for lydenhed
+ Name[de]=Ausweichgerät für Audio
+@@ -105,6 +107,7 @@
+ Comment[ar]=التنبيه عن اللجوء التلقائي إذا كانت اﻷدوات المفضلة غير متوافرة
+ Comment[bg]=Уведомяване при връщане към стандартното устройство, ако избраното е недостъпно
+ Comment[ca]=Notificació del canvi automàtic al dispositiu l'alternatiu si el dispositiu preferit no està disponible
++Comment[ca@valencia]=Notificació del canvi automàtic al dispositiu l'alternatiu si el dispositiu preferit no està disponible
+ Comment[cs]=Upozornění na automatickou náhradu, pokud je preferované zařízení nedostupné
+ Comment[da]=Bekendtgørelse af automatisk erstatning hvis den foretrukne enhed er utilgængelig
+ Comment[de]=Benachrichtigung bei automatischem Wechsel zum Ausweichgerät, wenn das bevorzugte Gerät nicht verfügbar ist
+@@ -139,7 +142,7 @@
+ Comment[sr@latin]=Obaveštenje o automatskom spadanju ako željeni uređaj nije dostupan
+ Comment[sv]=Underrättelse vid automatisk återgång om önskad enhet inte är tillgängliga
+ Comment[tr]=Tercih edilen aygıt erişilemez ise otomatik olarak yeni aygıta geçme bildirimi
+-Comment[uk]=Повідомлення про автоматичне повернення до типового пристрою, якщо бажаний пристрій недоступний
++Comment[uk]=Сповіщення про автоматичне повернення до типового пристрою, якщо бажаний пристрій недоступний
+ Comment[wa]=Notifiaedje des tcheyåjhes otomatikes si ls éndjins mî inmés n' sont nén disponibes
+ Comment[x-test]=xxNotification on automatic fallback if the preferred device is unavailablexx
+ Comment[zh_CN]=当首选设备无法使用时，通知会自动回滚到基本设备上发出
+diff -Nur kdemultimedia-4.3.4/kmix/restore_kmix_volumes.desktop kdemultimedia-4.3.5/kmix/restore_kmix_volumes.desktop
+--- kdemultimedia-4.3.4/kmix/restore_kmix_volumes.desktop	2009-10-02 10:20:27.000000000 +0200
++++ kdemultimedia-4.3.5/kmix/restore_kmix_volumes.desktop	2010-01-21 21:49:18.000000000 +0100
+@@ -10,6 +10,7 @@
+ Name[bn]=মিক্সার ভলিউম পুনঃস্থাপন করে
+ Name[br]=Assav pep tolzennad mesker
+ Name[ca]=Restaura els volums del mesclador
++Name[ca@valencia]=Restaura els volums del mesclador
+ Name[cs]=Obnovit nastavení hlasitosti
+ Name[cy]=Adfer Lefelau Sain y Cymysgydd
+ Name[da]=Genskab mikserlydstyrke
+diff -Nur kdemultimedia-4.3.4/kscd/kscd.desktop kdemultimedia-4.3.5/kscd/kscd.desktop
+--- kdemultimedia-4.3.4/kscd/kscd.desktop	2009-11-27 14:03:18.000000000 +0100
++++ kdemultimedia-4.3.5/kscd/kscd.desktop	2010-01-21 21:49:15.000000000 +0100
+@@ -6,6 +6,7 @@
+ GenericName[bn]=সিডি প্লেয়ার
+ GenericName[br]=Ur c'hoarier CD
+ GenericName[ca]=Reproductor de CD
++GenericName[ca@valencia]=Reproductor de CD
+ GenericName[cs]=CD přehrávač
+ GenericName[cy]=Chwaraewr CD
+ GenericName[da]=Cd-afspiller
+@@ -77,6 +78,7 @@
+ Name[bn]=কে-এস-সিডি
+ Name[br]=KsCD
+ Name[ca]=KsCD
++Name[ca@valencia]=KsCD
+ Name[cs]=KsCD
+ Name[cy]=KsCD
+ Name[da]=KsCD
+diff -Nur kdemultimedia-4.3.4/kscd/kscd-play-audiocd.desktop kdemultimedia-4.3.5/kscd/kscd-play-audiocd.desktop
+--- kdemultimedia-4.3.4/kscd/kscd-play-audiocd.desktop	2009-11-27 14:03:18.000000000 +0100
++++ kdemultimedia-4.3.5/kscd/kscd-play-audiocd.desktop	2010-01-21 21:49:15.000000000 +0100
+@@ -10,6 +10,7 @@
+ Name[ar]=شغل أقراص صوتية بـ KsCD
+ Name[bg]=Изпълнение на звукови дискове с KsCD
+ Name[ca]=Reprodueix CD d'àudio amb el KsCD
++Name[ca@valencia]=Reprodueix CD d'àudio amb el KsCD
+ Name[cs]=Přehrát audio CD v KsCD
+ Name[da]=Afspil lyd-cd med KsCD
+ Name[de]=Audio-CD mit KsCD abspielen
+diff -Nur kdemultimedia-4.3.4/libkcddb/kcmcddb/libkcddb.desktop kdemultimedia-4.3.5/libkcddb/kcmcddb/libkcddb.desktop
+--- kdemultimedia-4.3.4/libkcddb/kcmcddb/libkcddb.desktop	2009-10-02 10:20:27.000000000 +0200
++++ kdemultimedia-4.3.5/libkcddb/kcmcddb/libkcddb.desktop	2010-01-21 21:49:18.000000000 +0100
+@@ -13,6 +13,7 @@
+ Name[ar]=جَلْبُ CDDB
+ Name[bg]=Извличане от CDDB
+ Name[ca]=Recuperació CDDB
++Name[ca@valencia]=Recuperació CDDB
+ Name[cs]=Získání CDDB
+ Name[cy]=Cyrchu CDDB
+ Name[da]=CDDB-hentning
+@@ -31,7 +32,7 @@
+ Name[he]=אחזור CDDB
+ Name[hi]=सीडीडीबी रिट्राइवल
+ Name[hne]=सीडीडीबी रिट्राइवल
+-Name[hr]=Dohvat iz CDDB
++Name[hr]=Dohvat iz CDDB-a
+ Name[hu]=CDDB-lekérdezés
+ Name[is]=CDDB stillingar
+ Name[it]=Recupero CDDB
+@@ -78,6 +79,7 @@
+ GenericName[bg]=Настройки на CDDB
+ GenericName[br]=Kefluniadur CDDB
+ GenericName[ca]=Configuració CDDB
++GenericName[ca@valencia]=Configuració CDDB
+ GenericName[cs]=Nastavení CDDB
+ GenericName[cy]=Ffurfweddu CDDB
+ GenericName[da]=CDDB-indstilling
+@@ -143,6 +145,7 @@
+ Comment[ar]=تهيئة جلب CDDB
+ Comment[bg]=Настройки на извличане от CDDB
+ Comment[ca]=Configura la recuperació CDDB
++Comment[ca@valencia]=Configura la recuperació CDDB
+ Comment[cs]=Nastavení stahování z CDDB
+ Comment[cy]=Ffurfweddu Nôl o'r CDDB
+ Comment[da]=Indstil at hente via CDDB
+@@ -206,6 +209,7 @@
+ Keywords[bn]=cddb
+ Keywords[br]=cddb
+ Keywords[ca]=cddb
++Keywords[ca@valencia]=cddb
+ Keywords[cs]=cddb
+ Keywords[cy]=cddb
+ Keywords[da]=cddb
+diff -Nur kdemultimedia-4.3.4/mplayerthumbs/src/videopreview.desktop kdemultimedia-4.3.5/mplayerthumbs/src/videopreview.desktop
+--- kdemultimedia-4.3.4/mplayerthumbs/src/videopreview.desktop	2009-11-27 14:03:19.000000000 +0100
++++ kdemultimedia-4.3.5/mplayerthumbs/src/videopreview.desktop	2010-01-21 21:49:18.000000000 +0100
+@@ -4,6 +4,7 @@
+ Name[ar]=ملفات الفيديو (MPlayerThumbs)
+ Name[bg]=Видео-файлове (малки изображения)
+ Name[ca]=Fitxers de vídeo (Miniatures de l'MPlayer)
++Name[ca@valencia]=Fitxers de vídeo (Miniatures de l'MPlayer)
+ Name[cs]=Soubory videa (MPlayerThumbs)
+ Name[da]=Videofiler (MPlayerThumbs)
+ Name[de]=Videodateien (MPlayerThumbs)
+diff -Nur kdemultimedia-4.3.4/strigi-analyzer/avi/kfile_avi.desktop kdemultimedia-4.3.5/strigi-analyzer/avi/kfile_avi.desktop
+--- kdemultimedia-4.3.4/strigi-analyzer/avi/kfile_avi.desktop	2009-10-02 10:20:23.000000000 +0200
++++ kdemultimedia-4.3.5/strigi-analyzer/avi/kfile_avi.desktop	2010-01-21 21:49:15.000000000 +0100
+@@ -7,6 +7,7 @@
+ Name[bn]=এ-ভি-আই (AVI) তথ্য
+ Name[br]=Titouroù AVI
+ Name[ca]=Informació AVI
++Name[ca@valencia]=Informació AVI
+ Name[cs]=AVI info
+ Name[cy]=Gwybodaeth AVI
+ Name[da]=AVI-info
+diff -Nur kdemultimedia-4.3.4/strigi-analyzer/flac/kfile_flac.desktop kdemultimedia-4.3.5/strigi-analyzer/flac/kfile_flac.desktop
+--- kdemultimedia-4.3.4/strigi-analyzer/flac/kfile_flac.desktop	2009-10-02 10:20:24.000000000 +0200
++++ kdemultimedia-4.3.5/strigi-analyzer/flac/kfile_flac.desktop	2010-01-21 21:49:15.000000000 +0100
+@@ -6,6 +6,7 @@
+ Name[bn]=ফ্ল্যাক (FLAC) তথ্য
+ Name[br]=Titouroù FLAC
+ Name[ca]=Informació FLAC
++Name[ca@valencia]=Informació FLAC
+ Name[cs]=FLAC info
+ Name[cy]=Gwybodaeth FLAC
+ Name[da]=FLAC-Info
+diff -Nur kdemultimedia-4.3.4/strigi-analyzer/mp3/kfile_mp3.desktop kdemultimedia-4.3.5/strigi-analyzer/mp3/kfile_mp3.desktop
+--- kdemultimedia-4.3.4/strigi-analyzer/mp3/kfile_mp3.desktop	2009-11-27 14:03:18.000000000 +0100
++++ kdemultimedia-4.3.5/strigi-analyzer/mp3/kfile_mp3.desktop	2010-01-21 21:49:15.000000000 +0100
+@@ -8,6 +8,7 @@
+ Name[bn]=এম-পি-৩ (MP3) তথ্য
+ Name[br]=Titouroù MP3
+ Name[ca]=Informació MP3
++Name[ca@valencia]=Informació MP3
+ Name[cs]=MP3 info
+ Name[cy]=Gwybodaeth MP3
+ Name[da]=MP3-info
+diff -Nur kdemultimedia-4.3.4/strigi-analyzer/mpc/kfile_mpc.desktop kdemultimedia-4.3.5/strigi-analyzer/mpc/kfile_mpc.desktop
+--- kdemultimedia-4.3.4/strigi-analyzer/mpc/kfile_mpc.desktop	2009-11-27 14:03:18.000000000 +0100
++++ kdemultimedia-4.3.5/strigi-analyzer/mpc/kfile_mpc.desktop	2010-01-21 21:49:15.000000000 +0100
+@@ -5,6 +5,7 @@
+ Name[bg]=Информация за Musepack
+ Name[br]=Titouroù Musepack
+ Name[ca]=Informació Musepack
++Name[ca@valencia]=Informació Musepack
+ Name[cs]=Musepack info
+ Name[da]=Musepack Info
+ Name[de]=Musepack-Info
+diff -Nur kdemultimedia-4.3.4/strigi-analyzer/ogg/kfile_ogg.desktop kdemultimedia-4.3.5/strigi-analyzer/ogg/kfile_ogg.desktop
+--- kdemultimedia-4.3.4/strigi-analyzer/ogg/kfile_ogg.desktop	2009-11-27 14:03:18.000000000 +0100
++++ kdemultimedia-4.3.5/strigi-analyzer/ogg/kfile_ogg.desktop	2010-01-21 21:49:16.000000000 +0100
+@@ -7,6 +7,7 @@
+ Name[bn]=অগ তথ্য
+ Name[br]=Titouroù OGG
+ Name[ca]=Informació OGG
++Name[ca@valencia]=Informació OGG
+ Name[cs]=OGG info
+ Name[cy]=Gwybodaeth OGG
+ Name[da]=OGG-info
+diff -Nur kdemultimedia-4.3.4/strigi-analyzer/sid/kfile_sid.desktop kdemultimedia-4.3.5/strigi-analyzer/sid/kfile_sid.desktop
+--- kdemultimedia-4.3.4/strigi-analyzer/sid/kfile_sid.desktop	2009-10-02 10:20:23.000000000 +0200
++++ kdemultimedia-4.3.5/strigi-analyzer/sid/kfile_sid.desktop	2010-01-21 21:49:15.000000000 +0100
+@@ -5,6 +5,7 @@
+ Name[bg]=Информация за SID
+ Name[br]=Titouroù SID
+ Name[ca]=Informació SID
++Name[ca@valencia]=Informació SID
+ Name[cs]=SID info
+ Name[cy]=Gwybodaeth SID
+ Name[da]=SID-info
+diff -Nur kdemultimedia-4.3.4/strigi-analyzer/theora/kfile_theora.desktop kdemultimedia-4.3.5/strigi-analyzer/theora/kfile_theora.desktop
+--- kdemultimedia-4.3.4/strigi-analyzer/theora/kfile_theora.desktop	2009-10-02 10:20:24.000000000 +0200
++++ kdemultimedia-4.3.5/strigi-analyzer/theora/kfile_theora.desktop	2010-01-21 21:49:15.000000000 +0100
+@@ -6,6 +6,7 @@
+ Name[bn]=থিওরা তথ্য
+ Name[br]=Titouroù diwar-benn theora
+ Name[ca]=Informació theora
++Name[ca@valencia]=Informació theora
+ Name[cs]=theora info
+ Name[da]=theora Info
+ Name[de]=Theora-Info
+diff -Nur kdemultimedia-4.3.4/strigi-analyzer/wav/kfile_wav.desktop kdemultimedia-4.3.5/strigi-analyzer/wav/kfile_wav.desktop
+--- kdemultimedia-4.3.4/strigi-analyzer/wav/kfile_wav.desktop	2009-11-27 14:03:18.000000000 +0100
++++ kdemultimedia-4.3.5/strigi-analyzer/wav/kfile_wav.desktop	2010-01-21 21:49:16.000000000 +0100
+@@ -6,6 +6,7 @@
+ Name[bg]=Информация за WAV
+ Name[br]=Titouroù WAV
+ Name[ca]=Informació WAV
++Name[ca@valencia]=Informació WAV
+ Name[cs]=WAV info
+ Name[cy]=Gwybodaeth WAV
+ Name[da]=WAV-info

@@ -1,0 +1,12 @@
+diff -up kdemultimedia-4.3.2/doc/CMakeLists.txt.me kdemultimedia-4.3.2/doc/CMakeLists.txt
+--- kdemultimedia-4.3.2/doc/CMakeLists.txt.me	2009-11-10 18:08:31.000000000 +0100
++++ kdemultimedia-4.3.2/doc/CMakeLists.txt	2009-11-10 18:09:03.000000000 +0100
+@@ -5,5 +5,7 @@ add_subdirectory(kioslave)
+ add_subdirectory(kmix)
+ add_subdirectory(dragonplayer)
+ if (NOT APPLE)
+-  add_subdirectory(kscd)
++  if(MUSICBRAINZ_FOUND)
++     add_subdirectory(kscd)
++  endif(MUSICBRAINZ_FOUND)
+ endif (NOT APPLE)
